@@ -1,8 +1,0 @@
-// CUP specification for a simple expression evaluator (w/ actions)
-
-import java_cup.runtime.*;
-
-/* Terminals (tokens returned by the scanner). */
-terminal           SEMI, ADD, SUB, MUL, DIV;
-terminal           LPAREN, RPAREN, IDENT, ASSIG;
-terminal Integer   NUMBER;
