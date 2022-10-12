@@ -1,0 +1,82 @@
+
+import java.util.*;
+import java.io.*;
+import java_cup.runtime.*;
+
+action code
+	{:
+	TabelaSimbola tabela = new TabelaSimbola();
+	:};
+
+/* Terminali */
+terminal           SEMI, ADD, SUB, MUL, DIV;
+terminal           LPAREN, RPAREN, ASSIG;
+terminal Integer   NUMBER;
+terminal String IDENTIFAER;
+
+/* Neterminali */
+nonterminal            expr_list, expr_part;
+nonterminal String     add_op, mul_op;
+nonterminal Integer    expr, term, factor;
+
+/* Prvenstvo operatora */
+
+precedence left ADD, SUB;
+precedence left MUL, DIV;
+
+
+/* GRAMATIKA */
+
+expr_list ::= expr_list expr_part 
+	      | 
+              expr_part
+              ;
+
+expr_part ::= IDENTIFAER:id ASSIG expr:e SEMI
+	      {: 
+	      System.out.println(id+" = "+e) ;
+	      System.out.println() ;
+	      TabelaSimbolaStavka stavka = new TabelaSimbolaStavka(id, "IDENTIFIER", ""+e);
+	      tabela.dodaj(stavka);
+	      :}                            
+	      ;
+
+expr ::= term:t {: RESULT = t; :}
+	| 
+	expr:e add_op:op term:t 
+	{: 
+	RESULT = new Integer ((op.equals("add"))? e.intValue()+t.intValue() : e.intValue()-t.intValue()); 
+	String st = "";
+	st = (op.equals("add"))?  st+""+e.intValue()+"+"+t.intValue()+"="+RESULT : st+""+e.intValue()+"-"+t.intValue()+"="+RESULT;
+	System.out.println(st);
+	:}
+	;
+
+term ::= factor:f {: RESULT = f; :}
+	| 
+	term:t mul_op:op factor:f 
+	{: 
+	RESULT = new Integer((op.equals("mul"))? t.intValue()*f.intValue() : t.intValue()/f.intValue()); 
+	String st = "";
+	st = (op.equals("mul"))?  st+""+t.intValue()+"*"+f.intValue()+"="+RESULT : st+""+t.intValue()+"/"+f.intValue()+"="+RESULT;
+	System.out.println(st);	
+	:}
+	;
+
+factor ::= NUMBER:n 
+           {: 
+           RESULT = new Integer(n); 
+           :}
+           |
+           LPAREN expr:e RPAREN 
+           {: 
+           RESULT = e;
+           :}
+           |IDENTIFAER:iden
+           {:
+           RESULT = tabela.pretrazi(iden);
+           :}
+           ;
+
+add_op ::= ADD {: RESULT="add"; :} | SUB {: RESULT="sub"; :};
+mul_op ::= MUL {: RESULT="mul"; :} | DIV {: RESULT="div"; :};
