@@ -1,0 +1,117 @@
+import java.util.*;
+import java.io.*;
+import java_cup.runtime.*;
+
+action code
+	{:
+	TabelaSimbola tabela = new TabelaSimbola();
+	DFASintaksnoStablo stablo;
+	:};
+
+/* Terminali */
+terminal           SEMI, ADD, SUB, MUL, DIV;
+terminal           LPAREN, RPAREN, ASSIG;
+terminal Integer   NUMBER;
+terminal String IDENTIFAER;
+
+/* Neterminali */
+nonterminal            expr_list, expr_part;
+nonterminal String     add_op, mul_op;
+nonterminal DFACvorr    expr, term, factor;
+
+/* Prvenstvo operatora */
+
+precedence left ADD, SUB;
+precedence left MUL, DIV;
+
+
+/* GRAMATIKA */
+
+expr_list ::= expr_list expr_part 
+	      | 
+              expr_part
+              ;
+
+expr_part ::= IDENTIFAER:id ASSIG expr:e SEMI
+	      {: 
+	      RESULT = e;
+	      DFACvorr c = e;
+	      DFACvorr assig = new DFACvorr();
+	      assig.setLabel(":=");
+	      DFACvorr iden = new DFACvorr();
+	      iden.setLabel(id);
+	      assig.setLeftChild(iden);
+	      assig.setRightChild(c);	      
+	      stablo = new DFASintaksnoStablo(assig);
+              stablo.uredi(assig);
+              stablo.urediXY(assig);
+	      stablo.pokreni();	      
+	      TabelaSimbolaStavka stavka = new TabelaSimbolaStavka(id, "IDENTIFIER", ""+e);
+	      tabela.dodaj(stavka);	
+	      :}                            
+	      ;
+
+expr ::= term:t 
+        {: 
+        RESULT = t;      
+        :}
+	| 
+	expr:e add_op:op term:t 
+	{: 
+	DFACvorr c = new DFACvorr();
+	if(op.equals("add")){
+		c.setLabel("+");
+	}else{
+		c.setLabel("-");
+	}
+	
+	DFACvorr c1 = e; 
+	DFACvorr c2 = t; 
+	c.setLeftChild(c1);
+	c.setRightChild(c2);
+	RESULT = c;
+	:}
+	;
+
+term ::= factor:f 
+        {:
+        RESULT = f; 
+        :}
+	| 
+	term:t mul_op:op factor:f 
+	{: 
+	DFACvorr c = new DFACvorr();
+	if(op.equals("mul")){
+		c.setLabel("*");
+	}else{
+		c.setLabel("/");
+	}
+	DFACvorr c1 = t; 
+	DFACvorr c2 = f; 
+	c.setLeftChild(c1);
+	c.setRightChild(c2);
+	RESULT = c;		
+	:}
+	;
+
+factor ::= NUMBER:n 
+           {: 
+           DFACvorr c = new DFACvorr();
+           c.setLabel(""+n);
+           RESULT = c; 
+           :}
+           |
+           LPAREN expr:e RPAREN 
+           {: 
+           RESULT = e;
+           :}
+           |IDENTIFAER:iden
+           {:
+           DFACvorr c = new DFACvorr();
+           c.setLabel(""+iden);                    
+           RESULT = c;
+           :}
+           ;
+
+add_op ::= ADD {: RESULT="add"; :} | SUB {: RESULT="sub"; :};
+mul_op ::= MUL {: RESULT="mul"; :} | DIV {: RESULT="div"; :};

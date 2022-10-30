@@ -1,0 +1,33 @@
+import java_cup.runtime.*;
+
+/* Terminali*/
+terminal PLUS, MINUS, MUL, LPAREN, RPAREN, SEMI;
+terminal Integer   NUMBER;
+terminal String   IDENTIFAER;
+/* Neterminali */
+nonterminal Expr expr;
+nonterminal Term term;
+nonterminal Factor factor;
+nonterminal S prog;
+/* Gramatika */        
+expr  ::= term:t   
+          {: RESULT = new Expr(t); :} 
+	  | expr:e PLUS term:t    
+	  {: RESULT = new Expr('+', e, t); :} 
+	  | expr:e MINUS term:t    
+	  {: RESULT = new Expr('-',e, t); :} 
+	  ;
+term ::=  LPAREN expr:e RPAREN
+          {: RESULT = new Term(e); :}
+          |term:t MUL factor:f 
+          {: RESULT = new Term(t,f); :} 
+          |
+          factor:f 
+          {: RESULT = new Term(f); :}
+          ;
+factor::= NUMBER:n
+          {: RESULT = new Factor(n);  :}
+          |
+          IDENTIFAER:id
+          {: RESULT = new Factor(id);  :}
+          ;

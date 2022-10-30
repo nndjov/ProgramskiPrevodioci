@@ -1,0 +1,33 @@
+expr_list ::= expr_list expr_part 
+	      | 
+              expr_part
+
+expr_part ::= IDENTIFAER ASSIG expr  SEMI 
+
+expr := term term_add
+
+term_add := add_op term term_add | e
+
+term := factor factor_add
+
+factor_add := mult_op factor factor_add | e
+
+factor := ( expr )  | IDENTIFAER| NUMBER 
+
+add_op := + | -
+
+mult_op := * | /
+
+
+
+E → TE’
+E’ → +TE’
+E’ → ε
+T → FT’
+T’ → *FT’
+T’ → ε
+F → id
+F → (E)
+
+
+
